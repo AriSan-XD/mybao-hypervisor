@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "ipc.h": "c",
+        "bao.h": "c",
+        "hypercall.h": "c",
+        "vmm.h": "c"
+    }
+}
