@@ -9,4 +9,6 @@ configs/*
 !configs/configs.mk
 !configs/linker.ld 
 !configs/example/
+!configs/null/
 
+.vscode/*
