@@ -7,6 +7,7 @@
 #include <cpu.h>
 #include <vm.h>
 #include <ipc.h>
+#include <changes2.h>
 
 long int hypercall(unsigned long id)
 {
@@ -19,6 +20,9 @@ long int hypercall(unsigned long id)
     switch (id) {
         case HC_IPC:
             ret = ipc_hypercall(ipc_id, arg1, arg2);
+            break;
+        case HC_CHANGE_S2:
+            ret = changeS2();
             break;
         default:
             WARNING("Unknown hypercall id %d", id);
