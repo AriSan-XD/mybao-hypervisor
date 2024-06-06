@@ -18,12 +18,11 @@ long int hypercall(unsigned long id) {
 
     switch(id){
         case HC_IPC:
+            WARNING("handle in HC_IPC");
             ret = ipc_hypercall(ipc_id, arg1, arg2);
             break;
-        case 0x2:
-            ret = changeS2();
-            break;
         case HC_CHANGE_S2:
+            WARNING("handle in HC_CHANGE_S2"); 
             ret = changeS2();
             break;
         default:

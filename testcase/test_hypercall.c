@@ -5,7 +5,8 @@
 
 static inline void hvc_call(void) {
     asm volatile (
-        "mov x0, #2\n"  // Set the hypercall number (2 in this case)
+        "mov x0, #0xC6000000\n"  // Set the hypercall number (2 in this case)
+        "add x0, x0, #0x2\n"
         "hvc #0\n"      // Make the hypercall
         :               // No output
         :               // No input
