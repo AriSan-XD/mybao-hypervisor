@@ -1,0 +1,1 @@
+cmd_/home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall.mod := printf '%s\n'   test_hypercall.o | awk '!x[$$0]++ { print("/home/arisan/HDD/mybao-hypervisor/testcase/"$$0) }' > /home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall.mod
