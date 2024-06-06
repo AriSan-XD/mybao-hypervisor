@@ -1,13 +1,22 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/init.h>
+#include <linux/printk.h>
 
-// Declare the assembly function
-extern void hvc_call(void);
+static inline void hvc_call(void) {
+    asm volatile (
+        "mov x0, #2\n"  // Set the hypercall number (2 in this case)
+        "hvc #0\n"      // Make the hypercall
+        :               // No output
+        :               // No input
+        : "x0"          // Clobber list
+    );
+}
 
 static int __init my_module_init(void)
 {
     printk(KERN_INFO "Initializing my_module\n");
-    // Call the assembly function
+    // Call the inline assembly function
     hvc_call();
     return 0;
 }
