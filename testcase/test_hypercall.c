@@ -1,24 +1,53 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
-#include <linux/printk.h>
 
-static inline void hvc_call(void) {
+static void enable_cycle_counter(void) {
+    uint64_t value;
+
+    // Enable user-mode access to the performance counter
+    asm volatile ("mrs %0, pmuserenr_el0" : "=r" (value));
+    value |= 1;  // Set the EN bit
+    asm volatile ("msr pmuserenr_el0, %0" : : "r" (value));
+
+    // Enable cycle counter and reset all counters
+    asm volatile ("mrs %0, pmcr_el0" : "=r" (value));
+    value |= 1 | (1 << 2);  // Set the E bit to enable counting, and C bit to reset all counters
+    asm volatile ("msr pmcr_el0, %0" : : "r" (value));
+
+    // Enable cycle counter
+    asm volatile ("mrs %0, pmcntenset_el0" : "=r" (value));
+    value |= 1 << 31;  // Set the C bit to enable the cycle counter
+    asm volatile ("msr pmcntenset_el0, %0" : : "r" (value));
+}
+static inline uint64_t hvc_call(void) {
+    uint64_t start, end;
     asm volatile (
-        "mov x0, #0xC6000000\n"  // Set the hypercall number (2 in this case)
-        "add x0, x0, #0x2\n"
-        "hvc #0\n"      // Make the hypercall
-        :               // No output
+        "mov x0, #0xC6000000\n"     // Set the handler entry
+        "add x0, x0, #0x2\n"        // Set the hypercall number (2 in this case)
+        "mrs %0, pmccntr_el0\n"     // Read start counter
+        "isb\n"
+        "hvc #0\n"                  // Make the hypercall
+        "mrs %1, pmccntr_el0\n"     // Read end counter
+        "isb\n"
+        : "=r" (start), "=r" (end)  // Output operands
         :               // No input
         : "x0"          // Clobber list
     );
+    return end - start;
 }
 
 static int __init my_module_init(void)
 {
+
+    uint64_t cycles;
+    enable_cycle_counter();
     printk(KERN_INFO "Initializing my_module\n");
-    // Call the inline assembly function
-    hvc_call();
+    for(int i = 0; i < 100; i++)
+    {
+    cycles = hvc_call();             // Call the inline assembly function
+    printk(KERN_INFO "hvc call took %llu cycles\n", cycles);
+    }
     return 0;
 }
 

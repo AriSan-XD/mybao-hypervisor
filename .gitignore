@@ -12,7 +12,7 @@ configs/*
 !configs/null/
 
 .vscode/*
-*.mod
+*.mod*
 *.cmd
 *.mod.c
 *.symvers
