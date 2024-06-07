@@ -45,8 +45,8 @@ static int __init my_module_init(void)
     printk(KERN_INFO "Initializing my_module\n");
     for(int i = 0; i < 100; i++)
     {
-    cycles = hvc_call();             // Call the inline assembly function
-    printk(KERN_INFO "hvc call took %llu cycles\n", cycles);
+        cycles = hvc_call();             // Call the inline assembly function
+        printk(KERN_INFO "hvc call took %llu cycles\n", cycles);
     }
     return 0;
 }

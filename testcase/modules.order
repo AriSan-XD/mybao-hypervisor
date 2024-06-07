@@ -1,1 +1,2 @@
-/home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall.ko
+/home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall_cycle.ko
+/home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall_instruction.ko
