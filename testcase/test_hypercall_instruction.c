@@ -38,8 +38,10 @@ static inline uint64_t measure_hvc_instructions(void) {
         "mov x0, #0xC6000000\n"     // Set the handler entry
         "add x0, x0, #0x2\n"        // Set the hypercall number (2 in this case)
         "mrs %0, pmxevcntr_el0\n"  // Read start instruction count
+        "isb\n"
         "hvc #0\n"                 // Make the hypercall
         "mrs %1, pmxevcntr_el0\n"  // Read end instruction count
+        "isb\n"
         : "=r" (start), "=r" (end)  // Output operands
         :                            // Input operands
         : "x0"                       // Clobber list
