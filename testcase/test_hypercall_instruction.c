@@ -1,6 +1,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
+#include <linux/interrupt.h>
 
 // Enable performance counters and configure them for counting instructions
 static void enable_instruction_counter(void) {
@@ -52,6 +53,9 @@ static inline uint64_t measure_hvc_instructions(void) {
 
 static int __init my_module_init(void)
 {
+    unsigned long flags;
+    local_irq_save(flags); // close interrupts
+
     uint64_t instructions;
 
     printk(KERN_INFO "Initializing my_module\n");
@@ -63,6 +67,9 @@ static int __init my_module_init(void)
         instructions = measure_hvc_instructions();
         printk(KERN_INFO "hvc call executed %llu instructions\n", instructions);
     }
+
+    local_irq_restore(flags); // open interrupts
+
     return 0;
 }
 

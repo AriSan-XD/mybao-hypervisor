@@ -1,6 +1,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
+#include <linux/interrupt.h>
 
 static void enable_cycle_counter(void) {
     uint64_t value;
@@ -39,15 +40,23 @@ static inline uint64_t hvc_call(void) {
 
 static int __init my_module_init(void)
 {
+    unsigned long flags;
+    local_irq_save(flags); //close interrupt
 
     uint64_t cycles;
+
     enable_cycle_counter();
+
     printk(KERN_INFO "Initializing my_module\n");
+
     for(int i = 0; i < 100; i++)
     {
         cycles = hvc_call();             // Call the inline assembly function
         printk(KERN_INFO "hvc call took %llu cycles\n", cycles);
     }
+
+    local_irq_restore(flags); // open interrupt
+    
     return 0;
 }
 
