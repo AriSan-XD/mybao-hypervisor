@@ -146,9 +146,11 @@ curr_el_spx_serror:
 
 .balign ENTRY_SIZE
 lower_el_aarch64_sync:
-    VM_EXIT
-    bl	aborts_sync_handler
-    b   vcpu_arch_entry
+#    VM_EXIT
+#    bl	aborts_sync_handler
+    eret
+    b   .
+#    b   vcpu_arch_entry
 .balign ENTRY_SIZE
 lower_el_aarch64_irq:    
     VM_EXIT
