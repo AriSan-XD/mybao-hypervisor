@@ -1,1 +1,0 @@
-cmd_/home/arisan/HDD/mybao-hypervisor/testcase/modules.order := {   echo /home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall_cycle.ko;   echo /home/arisan/HDD/mybao-hypervisor/testcase/test_hypercall_instruction.ko; :; } > /home/arisan/HDD/mybao-hypervisor/testcase/modules.order
