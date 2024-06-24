@@ -4,6 +4,10 @@
         "bao.h": "c",
         "hypercall.h": "c",
         "vmm.h": "c",
-        "smcc.h": "c"
+        "smcc.h": "c",
+        "tlb.h": "c",
+        "sysregs.h": "c",
+        "creates2.h": "c",
+        "changes2.h": "c"
     }
 }

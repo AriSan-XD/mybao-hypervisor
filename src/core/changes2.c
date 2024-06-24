@@ -2,9 +2,9 @@
 
 #include <hypercall.h>
 #include <bao.h>
-long int changeS2(void)
+unsigned long changeS2(void)
 {
-    // long int ret = -HC_E_SUCCESS;
+    // unsigned long ret = -HC_E_SUCCESS;
     
     // printk("hello from changes2\n");
 
@@ -13,6 +13,14 @@ long int changeS2(void)
     // vttbr = sysreg_vttbr_el2_read();
 
     // sysreg_vttbr_el2_write(vttbr);
+    // if (/* condition */)
+    // {
+    //     /* code */;
+    // }
+    // else
+    // {
+    //     return -HC_E_FAILURE;
+    // }
 
     return -HC_E_SUCCESS;
 

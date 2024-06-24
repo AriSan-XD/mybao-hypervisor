@@ -12,7 +12,8 @@
 enum {
     HC_INVAL = 0,
     HC_IPC = 1,
-    HC_CHANGE_S2 = 2
+    HC_CHANGE_S2 = 2,
+    HC_CREATE_S2 = 3
 };
 
 enum {

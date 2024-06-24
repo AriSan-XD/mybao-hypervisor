@@ -1,5 +1,5 @@
-#ifndef CHANGE_S2_H
-#define CHANGE_S2_H
+#ifndef CREATE_S2_H
+#define CREATE_S2_H
 
 #include <bao.h>
 #include <mem.h>
@@ -7,6 +7,6 @@
 #include <arch/sysregs.h>
 #include <page_table.h>
 
-unsigned long changeS2(void);
+unsigned long createS2(void);
 
-#endif /*CHANGE_S2_H*/
+#endif /*CREATE_S2_H*/

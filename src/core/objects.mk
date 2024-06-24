@@ -12,5 +12,6 @@ core-objs-y+=config.o
 core-objs-y+=console.o
 core-objs-y+=ipc.o
 core-objs-y+=changes2.o
+core-objs-y+=creates2.o
 core-objs-y+=objpool.o
 core-objs-y+=hypercall.o
