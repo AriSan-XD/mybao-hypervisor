@@ -9,6 +9,7 @@
         "sysregs.h": "c",
         "creates2.h": "c",
         "changes2.h": "c",
-        "fences.h": "c"
+        "fences.h": "c",
+        "mem.h": "c"
     }
 }
