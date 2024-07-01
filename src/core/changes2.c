@@ -21,6 +21,13 @@ unsigned long changeS2(void)
     // {
     //     return -HC_E_FAILURE;
     // }
+    uint64_t vttbr_old = 0, vttbr_new = 0;
+    vttbr_old = sysreg_vttbr_el2_read();
+    vttbr_new = vttbr_old + 0xff;
+    sysreg_vttbr_el2_write(vttbr_new);
+    // printk("expecting no error");
+    // printk("vttbr_old: 0x%lx\n", vttbr_old);
+    // printk("vttbr_new: 0x%lx\n", vttbr_new);
 
     return -HC_E_SUCCESS;
 
