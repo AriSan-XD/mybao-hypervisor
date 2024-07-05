@@ -324,8 +324,8 @@ _enter_vas_warm:
 _copy_stage2:
 	mrs x3, VTTBR_EL2
 	lsr x3, x3, #8
-	and x3, x3, #0xffffffff
-	lsl x3, x3, #12   //get the physical base address within vttbr
+	and x3, x3, #0xfffffffff
+	lsl x3, x3, #8   //get the physical base address within vttbr
 
 	mov x0, x3  			// Source address
     ldr x1, =0x00410000000  // Destination address
