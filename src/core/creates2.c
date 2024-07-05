@@ -12,17 +12,6 @@
 #include <fences.h>
 #include <tlb.h>
 
-void *copy(void *base, const size_t size)
-{
-    struct ppages *pages = {0};
-    *pages = mem_alloc_ppages(cpu()->as.colors, NUM_PAGES(size), false);
-    vaddr_t va = mem_alloc_vpage(&cpu()->as, SEC_HYP_PRIVATE, INVALID_VA,
-                                 NUM_PAGES(size));
-    mem_map(&cpu()->as, va, pages, NUM_PAGES(size), PTE_HYP_FLAGS);
-    memcpy((void *)va, base, size);
-
-    return (void *)va;
-}
 unsigned long createS2(void)
 {
     // unsigned long ret = -HC_E_SUCCESS;
@@ -86,18 +75,26 @@ unsigned long createS2(void)
     // vttbr_confirm = sysreg_vttbr_el2_read();
     // printk("vttbr_confirm: 0x%lx\n", vttbr_confirm);
 
-    uint64_t flat_offset = 0x1111;
-    vaddr_t va = &flat_offset;
-    paddr_t par = 0, par_saved = 0;
-    printk("va of flat_offset: 0x%lx\n", va);
-    par_saved = sysreg_par_el1_read();
-    printk("par_saved: 0x%lx\n", par_saved);
-    arm_at_s1e2w(&flat_offset);
-    ISB();
-    par = sysreg_par_el1_read();
-    printk("par: 0x%lx\n", par);
-    sysreg_par_el1_write(par_saved);
+    // uint64_t flat_offset = 0x1111;
+    // vaddr_t va = &flat_offset;
+    // paddr_t par = 0, par_saved = 0;
+    // printk("va of flat_offset: 0x%lx\n", va);
+    // par_saved = sysreg_par_el1_read();
+    // printk("par_saved: 0x%lx\n", par_saved);
+    // arm_at_s1e2w(&flat_offset);
+    // ISB();
+    // par = sysreg_par_el1_read();
+    // printk("par: 0x%lx\n", par);
+    // sysreg_par_el1_write(par_saved);
 
-    printk("pa = 0x%lx\n", (par & PAR_PA_MSK) | (va & (PAGE_SIZE - 1)));
+    // printk("pa = 0x%lx\n", (par & PAR_PA_MSK) | (va & (PAGE_SIZE - 1)));
+
+    size_t lvl = 0;
+    pte_t *pte = pt_get_pte(&ass->pt, lvl, vas);
+    while (!pte_page(&ass->pt, pte, lvl)) {
+        lvl += 1;
+        pte = pt_get_pte(&ass->pt, lvl, vas);
+    }
+
     return -HC_E_SUCCESS;
 }

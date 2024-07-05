@@ -22,12 +22,13 @@ unsigned long changeS2(void)
     //     return -HC_E_FAILURE;
     // }
     uint64_t vttbr_old = 0, vttbr_new = 0;
+    uint64_t new_lvl_0_pa = 0x00410000000;
     vttbr_old = sysreg_vttbr_el2_read();
-    vttbr_new = vttbr_old + 0xff;
+    printk("vttbr_old: 0x%lx\n", vttbr_old);
+    vttbr_new = (vttbr_old & ~((uint64_t)0xfffffffff << 8)) | (new_lvl_0_pa & ((uint64_t)0xfffffffff << 8));
+    printk("vttbr_new: 0x%lx\n", vttbr_new);
     sysreg_vttbr_el2_write(vttbr_new);
-    // printk("expecting no error");
-    // printk("vttbr_old: 0x%lx\n", vttbr_old);
-    // printk("vttbr_new: 0x%lx\n", vttbr_new);
+
 
     return -HC_E_SUCCESS;
 

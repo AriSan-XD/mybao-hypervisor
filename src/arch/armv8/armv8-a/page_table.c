@@ -69,7 +69,7 @@ void pt_set_recursive(struct page_table* pt, size_t index)
     }
 }
 
-#define show(v) (printk("[%s]" #v "= 0x%lx\n", __func__, *(uint64_t *)&v))
+// #define show(v) (printk("[%s]" #v "= 0x%lx\n", __func__, *(uint64_t *)&v))
 
 pte_t* pt_get_pte(struct page_table* pt, size_t lvl, vaddr_t va)
 {
@@ -78,27 +78,28 @@ pte_t* pt_get_pte(struct page_table* pt, size_t lvl, vaddr_t va)
 
     struct page_table* cpu_pt = &cpu()->as.pt;
 
-    show(cpu_pt);
+    // show(cpu_pt);
 
     size_t rec_ind_off = cpu_pt->dscr->lvl_off[cpu_pt->dscr->lvls - lvl - 1];
     size_t rec_ind_len = cpu_pt->dscr->lvl_wdt[cpu_pt->dscr->lvls - lvl - 1];
     uintptr_t rec_ind_mask = PTE_MASK(rec_ind_off, rec_ind_len - rec_ind_off);
 
-    show(rec_ind_off);
-    show(rec_ind_len);
-    show(rec_ind_mask);
+    // show(rec_ind_off);
+    // show(rec_ind_len);
+    // show(rec_ind_mask);
 
     uintptr_t addr = cpu_pt->arch.rec_mask & ~PTE_MASK(0, rec_ind_len);
 
-    show(addr);
+    // show(cpu_pt->arch.rec_mask);
+    // show(addr);
 
     addr |= (pt->arch.rec_ind << rec_ind_off) & rec_ind_mask;
 
-    show(addr);
+    // show(addr);
 
     addr |= (va >> pt->dscr->lvl_off[lvl]) * sizeof(pte_t) & PTE_MASK(0, rec_ind_off);
 
-    show(addr);
+    // show(addr);
 
     return (pte_t*)addr;
 }
