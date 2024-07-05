@@ -73,8 +73,8 @@ void pt_set_recursive(struct page_table* pt, size_t index)
 
 pte_t* pt_get_pte(struct page_table* pt, size_t lvl, vaddr_t va)
 {
-    printk("[%s] pt = %p, lvl = %ld, va = 0x%lx\n",
-        __func__, pt, lvl, va);
+    // printk("[%s] pt = %p, lvl = %ld, va = 0x%lx\n",
+    //     __func__, pt, lvl, va);
 
     struct page_table* cpu_pt = &cpu()->as.pt;
 

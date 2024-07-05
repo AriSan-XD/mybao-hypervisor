@@ -327,12 +327,12 @@ _copy_stage2:
 	and x3, x3, #0xffffffff
 	lsl x3, x3, #12   //get the physical base address within vttbr
 
-	ldr x0, x3  			// Source address
+	mov x0, x3  			// Source address
     ldr x1, =0x00410000000  // Destination address
     ldr x2, =512            // Number of 8-byte words in 4KB
 	ret
 
-_copy_loop:
+copy_loop:
 	ldr x4, [x0], #8        // Load 8 bytes from source and increment source pointer
     str x4, [x1], #8        // Store 8 bytes to destination and increment destination pointer
     subs x2, x2, #1         // Decrement the loop counter

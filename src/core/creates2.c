@@ -16,26 +16,26 @@ unsigned long createS2(void)
 {
     // unsigned long ret = -HC_E_SUCCESS;
     // uint64_t flat_offset = 0xfd8000000000;
-    // uint64_t vttbr_old = 0, id_aa64mmfr0_el1 = 0, vtcr_el2 = 0;
+    uint64_t vttbr_old = 0, id_aa64mmfr0_el1 = 0, vtcr_el2 = 0, lvl_0_pa = 0;
     // // uint64_t vttbr_new = 0, vttbr_confirm = 0;
-    // size_t parange = 0;
+    size_t parange = 0;
     // // vaddr_t new_lvl_0_va = 0;
     // vaddr_t assume_lvl_0_va = 0;
     // paddr_t old_lvl_0_pa = 0, new_lvl_0_pa = 0;
-    // vttbr_old = sysreg_vttbr_el2_read();
-    // vtcr_el2 = sysreg_vtcr_el2_read();
-    // id_aa64mmfr0_el1 = sysreg_id_aa64mmfr0_el1_read();
+    vttbr_old = sysreg_vttbr_el2_read();
+    vtcr_el2 = sysreg_vtcr_el2_read();
+    id_aa64mmfr0_el1 = sysreg_id_aa64mmfr0_el1_read();
 
-    // parange = id_aa64mmfr0_el1 & ID_AA64MMFR0_PAR_MSK;
+    parange = id_aa64mmfr0_el1 & ID_AA64MMFR0_PAR_MSK;
 
-    // printk("vttbr_old: 0x%lx\n", vttbr_old);
-    // printk("vtcr_el2: 0x%lx\n", vtcr_el2);
-    // printk("id_aa64mmfr0_el1: 0x%lx\n", id_aa64mmfr0_el1);
-    // printk("parange: 0x%lx\n", parange);
+    printk("vttbr_old: 0x%lx\n", vttbr_old);
+    printk("vtcr_el2: 0x%lx\n", vtcr_el2);
+    printk("id_aa64mmfr0_el1: 0x%lx\n", id_aa64mmfr0_el1);
+    printk("parange: 0x%lx\n", parange);
 
-    // old_lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xffffffff) << 12);
+    lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xffffffff) << 12);
     // assume_lvl_0_va = old_lvl_0_pa + flat_offset;
-    // printk("old_lvl_0_pa: 0x%lx\n", old_lvl_0_pa);
+    printk("old_lvl_0_pa: 0x%lx\n", lvl_0_pa);
     // printk("assume_lvl_0_va: 0x%lx\n", assume_lvl_0_va);
     // // printk("value of assume_lvl_0_va: 0x%lx\n", *((uint64_t
     // // *)assume_lvl_0_va));
@@ -89,12 +89,12 @@ unsigned long createS2(void)
 
     // printk("pa = 0x%lx\n", (par & PAR_PA_MSK) | (va & (PAGE_SIZE - 1)));
 
-    size_t lvl = 0;
-    pte_t *pte = pt_get_pte(&ass->pt, lvl, vas);
-    while (!pte_page(&ass->pt, pte, lvl)) {
-        lvl += 1;
-        pte = pt_get_pte(&ass->pt, lvl, vas);
-    }
+    // size_t lvl = 0;
+    // pte_t *pte = pt_get_pte(&ass->pt, lvl, vas);
+    // while (!pte_page(&ass->pt, pte, lvl)) {
+    //     lvl += 1;
+    //     pte = pt_get_pte(&ass->pt, lvl, vas);
+    // }
 
     return -HC_E_SUCCESS;
 }
