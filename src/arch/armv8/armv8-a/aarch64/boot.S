@@ -284,9 +284,11 @@ warm_boot:
 	ldr	x3, =_hyp_vector_table
 	msr	VBAR_EL2, x3
 
+	/*
 	/* create a top Stage 2 table */
 	ldr x5, =_copy_stage2
 	br x5
+	*/
 
     tlbi	alle2 
 	dsb	nsh
@@ -319,7 +321,7 @@ _enter_vas_warm:
 
 	bl	psci_wake
 	b 	.
-
+/*
 /* allocate 4KB page and copy vttbr content */
 _copy_stage2:
 	mrs x3, VTTBR_EL2
@@ -328,17 +330,16 @@ _copy_stage2:
 	lsl x3, x3, #8   //get the physical base address within vttbr
 
 	mov x0, x3  			// Source address
-    ldr x1, =0x00410000000  // Destination address
+    ldr x1, =0x00041000000  // Destination address
     ldr x2, =512            // Number of 8-byte words in 4KB
-	ret
-
+	
 copy_loop:
 	ldr x4, [x0], #8        // Load 8 bytes from source and increment source pointer
     str x4, [x1], #8        // Store 8 bytes to destination and increment destination pointer
     subs x2, x2, #1         // Decrement the loop counter
     b.ne copy_loop          // If counter is not zero, branch to copy_loop
 
-    // Infinite loop to prevent exit
-    b .
+    ret
+*/
 
 .endfunc

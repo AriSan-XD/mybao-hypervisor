@@ -11,17 +11,13 @@
 #include <vm.h>
 #include <fences.h>
 #include <tlb.h>
-
 unsigned long createS2(void)
 {
-    // unsigned long ret = -HC_E_SUCCESS;
-    // uint64_t flat_offset = 0xfd8000000000;
+
     uint64_t vttbr_old = 0, id_aa64mmfr0_el1 = 0, vtcr_el2 = 0, lvl_0_pa = 0;
-    // // uint64_t vttbr_new = 0, vttbr_confirm = 0;
+    uint64_t content = 0;
     size_t parange = 0;
-    // // vaddr_t new_lvl_0_va = 0;
-    // vaddr_t assume_lvl_0_va = 0;
-    // paddr_t old_lvl_0_pa = 0, new_lvl_0_pa = 0;
+
     vttbr_old = sysreg_vttbr_el2_read();
     vtcr_el2 = sysreg_vtcr_el2_read();
     id_aa64mmfr0_el1 = sysreg_id_aa64mmfr0_el1_read();
@@ -34,67 +30,50 @@ unsigned long createS2(void)
     printk("parange: 0x%lx\n", parange);
 
     lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xffffffff) << 12);
-    // assume_lvl_0_va = old_lvl_0_pa + flat_offset;
-    printk("old_lvl_0_pa: 0x%lx\n", lvl_0_pa);
-    // printk("assume_lvl_0_va: 0x%lx\n", assume_lvl_0_va);
-    // // printk("value of assume_lvl_0_va: 0x%lx\n", *((uint64_t
-    // // *)assume_lvl_0_va));
-    // // printk("as: %d\n", &cpu()->as);
-    // if (mem_translate(AS_HYP, assume_lvl_0_va, &new_lvl_0_pa)) {
-    //     printk("new_lvl_0_pa: 0x%lx\n", new_lvl_0_pa);
-    // } else {
-    //     printk("translate falut");
-    // }
+    printk("lvl_0_pa: 0x%lx\n", lvl_0_pa);
 
-    // new_lvl_0_va = copy_space((void *)vttbr_old, 1u << 5);
-    // new_lvl_0_va = (vaddr_t)copy((void *)old_lvl_0_pa, 1u);
-    // printk("copy done");
+    asm volatile (
+    "mrs x3, SCTLR_EL2\n" 
+	"bic x3, x3, #0x7\n"	
+	"msr SCTLR_EL2, x3\n" 
+    
+    "ldr %0, [%1]\n"
 
-    // if (mem_translate(&cpu()->as, new_lvl_0_va, (paddr_t *)new_lvl_0_pa))
-    // {
-    //     printk("new_lvl_0_pa: 0x%lx\n", new_lvl_0_pa);
-    // }
-    // else
-    // {
-    //     printk("translate falut");
-    // }
+    "ldr x4, =(SCTLR_RES1 | SCTLR_M | SCTLR_C | SCTLR_I)\n"
+	"msr SCTLR_EL2, x4\n"
+    : "=r" (content)
+    : "r" (lvl_0_pa)
+    : "x3", "x4", "memory");
 
-    // vttbr_new = (vttbr_old & ~((uint64_t)0xfffffffff << 8)) |
-    //             (new_lvl_0_pa & ((uint64_t)0xfffffffff << 8));
-    // printk("vttbr_new: 0x%lx\n", vttbr_new);
-    // sysreg_vttbr_el2_write(vttbr_new);
+    printk("content of 0x%lx: 0x%lx\n", lvl_0_pa, content);
+    
+/*
+    uint64_t src, dst = 0x00041000000;
+    uint64_t num_words = 512;
+    // Inline assembly to copy the 4KB page
+    asm volatile (
+        // Extract physical base address from VTTBR_EL2
+        "mrs %0, VTTBR_EL2\n\t"          // Move VTTBR_EL2 to src
+        "lsr %0, %0, #8\n\t"             // Logical shift right by 8 bits
+        "and %0, %0, #0xfffffffff\n\t"   // Mask the lower 36 bits
+        "lsl %0, %0, #8\n\t"             // Logical shift left by 8 bits
+        
+        // Setup loop variables
+        "mov x1, %1\n\t"                 // Move dst to x1
+        "mov x2, %2\n\t"                 // Move num_words to x2
+        
+        "1:\n\t"
+        "ldr x4, [%0], #8\n\t"           // Load 8 bytes from source and increment source pointer
+        "str x4, [x1], #8\n\t"           // Store 8 bytes to destination and increment destination pointer
+        "subs x2, x2, #1\n\t"            // Decrement loop counter
+        "b.ne 1b\n\t"                    // If counter is not zero, branch to 1
+        
+        : "=&r"(src)                     // Output operand, src register (modified)
+        : "r"(dst), "r"(num_words)       // Input operands, dst and num_words
+        : "x0", "x1", "x2", "x4"         // Clobbered registers
+    );
+*/
 
-    // vttbr_new = vttbr_old + 0xff;
-    // sysreg_vttbr_el2_write(vttbr_new);
-    // printk("expecting no error");
-
-    // vttbr_new = vttbr_old + 0x1ff;
-    // sysreg_vttbr_el2_write(vttbr_new);
-    // printk("expecting error");
-
-    // vttbr_confirm = sysreg_vttbr_el2_read();
-    // printk("vttbr_confirm: 0x%lx\n", vttbr_confirm);
-
-    // uint64_t flat_offset = 0x1111;
-    // vaddr_t va = &flat_offset;
-    // paddr_t par = 0, par_saved = 0;
-    // printk("va of flat_offset: 0x%lx\n", va);
-    // par_saved = sysreg_par_el1_read();
-    // printk("par_saved: 0x%lx\n", par_saved);
-    // arm_at_s1e2w(&flat_offset);
-    // ISB();
-    // par = sysreg_par_el1_read();
-    // printk("par: 0x%lx\n", par);
-    // sysreg_par_el1_write(par_saved);
-
-    // printk("pa = 0x%lx\n", (par & PAR_PA_MSK) | (va & (PAGE_SIZE - 1)));
-
-    // size_t lvl = 0;
-    // pte_t *pte = pt_get_pte(&ass->pt, lvl, vas);
-    // while (!pte_page(&ass->pt, pte, lvl)) {
-    //     lvl += 1;
-    //     pte = pt_get_pte(&ass->pt, lvl, vas);
-    // }
 
     return -HC_E_SUCCESS;
 }
