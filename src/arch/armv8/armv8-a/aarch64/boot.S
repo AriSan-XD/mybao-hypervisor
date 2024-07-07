@@ -285,7 +285,7 @@ warm_boot:
 	msr	VBAR_EL2, x3
 
 	/*
-	/* create a top Stage 2 table */
+	// create a top Stage 2 table
 	ldr x5, =_copy_stage2
 	br x5
 	*/
@@ -322,7 +322,7 @@ _enter_vas_warm:
 	bl	psci_wake
 	b 	.
 /*
-/* allocate 4KB page and copy vttbr content */
+// allocate 4KB page and copy vttbr content
 _copy_stage2:
 	mrs x3, VTTBR_EL2
 	lsr x3, x3, #8
@@ -341,5 +341,34 @@ copy_loop:
 
     ret
 */
+
+.endfunc
+
+.global create_stage2
+.func create_stage2
+create_stage2:
+copy_stage2:
+	mrs x3, VTTBR_EL2
+	lsr x3, x3, #8
+	and x3, x3, #0xfffffffff
+	lsl x3, x3, #8   //get the physical base address within vttbr
+
+	mov x0, x3  			// Source address
+    ldr x1, =0x00041000000  // Destination address
+    ldr x2, =512            // Number of 8-byte words in 4KB
+	
+copy_loop:
+	ldr x4, [x0], #8        // Load 8 bytes from source and increment source pointer
+    str x4, [x1], #8        // Store 8 bytes to destination and increment destination pointer
+    subs x2, x2, #1         // Decrement the loop counter
+    b.ne copy_loop          // If counter is not zero, branch to copy_loop
+
+	tlbi	alle2 
+	dsb	nsh
+	isb
+
+	/* Enable MMU and caches */
+	ldr x4, =(SCTLR_RES1 | SCTLR_M | SCTLR_C | SCTLR_I)
+	msr	SCTLR_EL2, x4
 
 .endfunc

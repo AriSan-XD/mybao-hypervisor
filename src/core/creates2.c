@@ -17,6 +17,7 @@ unsigned long createS2(void)
     uint64_t vttbr_old = 0, id_aa64mmfr0_el1 = 0, vtcr_el2 = 0, lvl_0_pa = 0;
     uint64_t content = 0;
     size_t parange = 0;
+    // uint64_t sctrl_saved = 0, sctrl_new = 0;
 
     vttbr_old = sysreg_vttbr_el2_read();
     vtcr_el2 = sysreg_vtcr_el2_read();
@@ -29,9 +30,18 @@ unsigned long createS2(void)
     printk("id_aa64mmfr0_el1: 0x%lx\n", id_aa64mmfr0_el1);
     printk("parange: 0x%lx\n", parange);
 
-    lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xffffffff) << 12);
+    lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xfffffffff) << 8);
     printk("lvl_0_pa: 0x%lx\n", lvl_0_pa);
 
+    // cpu_sync_barrier(&cpu_glb_sync);
+
+    // flag = SCTLR_RES1 | SCTLR_M | SCTLR_C | SCTLR_I = 0x30c51835
+    // sctrl_saved = sysreg_sctlr_el2_read();
+    // printk("sctrl_el1_saved: 0x%lx\n", sctrl_saved);
+    // sctrl_new = sctrl_saved & ~0x7;
+    // printk("sctrl_el1_new: 0x%lx\n", sctrl_new);
+    // // cpu_sync_barrier(&cpu_glb_sync);
+    // sysreg_sctlr_el2_write(sctrl_new);
     asm volatile (
     "mrs x3, SCTLR_EL2\n" 
 	"bic x3, x3, #0x7\n"	
@@ -39,11 +49,19 @@ unsigned long createS2(void)
     
     "ldr %0, [%1]\n"
 
-    "ldr x4, =(SCTLR_RES1 | SCTLR_M | SCTLR_C | SCTLR_I)\n"
+    "ldr x4, =0x30c51835\n"
 	"msr SCTLR_EL2, x4\n"
+    "tlbi alle2\n"
+    "dsb nsh\n"
+    "isb\n"
     : "=r" (content)
     : "r" (lvl_0_pa)
     : "x3", "x4", "memory");
+    // sysreg_sctlr_el1_write(sctrl_saved);
+    // cpu_sync_barrier(&cpu_glb_sync);
+    
+
+    // cpu_sync_barrier(&cpu_glb_sync);
 
     printk("content of 0x%lx: 0x%lx\n", lvl_0_pa, content);
     
@@ -76,4 +94,5 @@ unsigned long createS2(void)
 
 
     return -HC_E_SUCCESS;
+    // return lvl_0_pa;
 }

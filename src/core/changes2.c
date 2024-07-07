@@ -2,8 +2,10 @@
 
 #include <hypercall.h>
 #include <bao.h>
+#include <arch/psci.h>
 unsigned long changeS2(void)
 {
+    extern void create_stage2(void);
     // unsigned long ret = -HC_E_SUCCESS;
     
     // printk("hello from changes2\n");
@@ -21,9 +23,11 @@ unsigned long changeS2(void)
     // {
     //     return -HC_E_FAILURE;
     // }
+    create_stage2();
     uint64_t vttbr_old = 0, vttbr_new = 0;
-    uint64_t new_lvl_0_pa = 0x00042000000;
+    uint64_t new_lvl_0_pa = 0x00041000000;
     uint64_t old_lvl_0_pa = 0x0;
+    psci_restore_state();
     vttbr_old = sysreg_vttbr_el2_read();
     printk("vttbr_old: 0x%lx\n", vttbr_old);
     old_lvl_0_pa = ((vttbr_old >> 8) & 0xfffffffff) << 8;

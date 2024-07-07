@@ -11,6 +11,8 @@
         "changes2.h": "c",
         "fences.h": "c",
         "mem.h": "c",
-        "page_table.h": "c"
+        "page_table.h": "c",
+        "psci.h": "c",
+        "gic.h": "c"
     }
 }
