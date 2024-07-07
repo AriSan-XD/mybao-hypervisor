@@ -43,17 +43,17 @@ unsigned long createS2(void)
     // // cpu_sync_barrier(&cpu_glb_sync);
     // sysreg_sctlr_el2_write(sctrl_new);
     asm volatile (
-    "mrs x3, SCTLR_EL2\n" 
-	"bic x3, x3, #0x7\n"	
-	"msr SCTLR_EL2, x3\n" 
+    // "mrs x3, SCTLR_EL2\n" 
+	// "bic x3, x3, #0x7\n"	
+	// "msr SCTLR_EL2, x3\n" 
     
     "ldr %0, [%1]\n"
 
-    "ldr x4, =0x30c51835\n"
-	"msr SCTLR_EL2, x4\n"
-    "tlbi alle2\n"
-    "dsb nsh\n"
-    "isb\n"
+    // "ldr x4, =0x30c51835\n"
+	// "msr SCTLR_EL2, x4\n"
+    // "tlbi alle2\n"
+    // "dsb nsh\n"
+    // "isb\n"
     : "=r" (content)
     : "r" (lvl_0_pa)
     : "x3", "x4", "memory");
