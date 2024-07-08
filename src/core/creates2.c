@@ -2,97 +2,59 @@
 
 #include <hypercall.h>
 #include <bao.h>
-#include <arch/sysregs.h>
-#include <mem.h>
-#include <cpu.h>
-#include <page_table.h>
-#include <cache.h>
-#include <string.h>
-#include <vm.h>
-#include <fences.h>
-#include <tlb.h>
 unsigned long createS2(void)
 {
 
-    uint64_t vttbr_old = 0, id_aa64mmfr0_el1 = 0, vtcr_el2 = 0, lvl_0_pa = 0;
+    uint64_t vttbr_old = 0;
+    
+    uint64_t old_lvl_0_pa = 0, new_lvl_0_pa = 0;
     uint64_t content = 0;
-    size_t parange = 0;
+
+    // uint64_t id_aa64mmfr0_el1 = 0, vtcr_el2 = 0;
+    // size_t parange = 0;
     // uint64_t sctrl_saved = 0, sctrl_new = 0;
+   
+    // vtcr_el2 = sysreg_vtcr_el2_read();
+    // id_aa64mmfr0_el1 = sysreg_id_aa64mmfr0_el1_read();
+    // parange = id_aa64mmfr0_el1 & ID_AA64MMFR0_PAR_MSK;
+ 
+    // printk("vtcr_el2: 0x%lx\n", vtcr_el2);
+    // printk("id_aa64mmfr0_el1: 0x%lx\n", id_aa64mmfr0_el1);
+    // printk("parange: 0x%lx\n", parange);
 
     vttbr_old = sysreg_vttbr_el2_read();
-    vtcr_el2 = sysreg_vtcr_el2_read();
-    id_aa64mmfr0_el1 = sysreg_id_aa64mmfr0_el1_read();
-
-    parange = id_aa64mmfr0_el1 & ID_AA64MMFR0_PAR_MSK;
-
     printk("vttbr_old: 0x%lx\n", vttbr_old);
-    printk("vtcr_el2: 0x%lx\n", vtcr_el2);
-    printk("id_aa64mmfr0_el1: 0x%lx\n", id_aa64mmfr0_el1);
-    printk("parange: 0x%lx\n", parange);
+    old_lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xfffffffff) << 8);
+    printk("lvl_0_pa: 0x%lx\n", old_lvl_0_pa);
 
-    lvl_0_pa = ((((vttbr_old >> 1) >> 7) & 0xfffffffff) << 8);
-    printk("lvl_0_pa: 0x%lx\n", lvl_0_pa);
+    asm volatile (   
+        "ldr %0, [%1]\n"
+        : "=r" (content)
+        : "r" (old_lvl_0_pa)
+        : "x3", "x4", "memory");
 
-    // cpu_sync_barrier(&cpu_glb_sync);
-
-    // flag = SCTLR_RES1 | SCTLR_M | SCTLR_C | SCTLR_I = 0x30c51835
-    // sctrl_saved = sysreg_sctlr_el2_read();
-    // printk("sctrl_el1_saved: 0x%lx\n", sctrl_saved);
-    // sctrl_new = sctrl_saved & ~0x7;
-    // printk("sctrl_el1_new: 0x%lx\n", sctrl_new);
-    // // cpu_sync_barrier(&cpu_glb_sync);
-    // sysreg_sctlr_el2_write(sctrl_new);
-    asm volatile (
-    // "mrs x3, SCTLR_EL2\n" 
-	// "bic x3, x3, #0x7\n"	
-	// "msr SCTLR_EL2, x3\n" 
+    printk("content of 0x%lx: 0x%lx\n", old_lvl_0_pa, content);
     
-    "ldr %0, [%1]\n"
+    new_lvl_0_pa = 0x00041000000;
 
-    // "ldr x4, =0x30c51835\n"
-	// "msr SCTLR_EL2, x4\n"
-    // "tlbi alle2\n"
-    // "dsb nsh\n"
-    // "isb\n"
-    : "=r" (content)
-    : "r" (lvl_0_pa)
-    : "x3", "x4", "memory");
-    // sysreg_sctlr_el1_write(sctrl_saved);
-    // cpu_sync_barrier(&cpu_glb_sync);
-    
+    for (int i = 0; i < 512 * 8; i+=8)
+    {
+        asm volatile (
+            "ldr x4, [%0], #8\n"
+            "str x4, [%1], #8\n"
+            : 
+            : "r"(old_lvl_0_pa + i), "r"(new_lvl_0_pa + i)
+            : "x4", "memory"
+        );
+    }
 
-    // cpu_sync_barrier(&cpu_glb_sync);
+    asm volatile (   
+        "ldr %0, [%1]\n"
+        : "=r" (content)
+        : "r" (new_lvl_0_pa)
+        : "x3", "x4", "memory");
 
-    printk("content of 0x%lx: 0x%lx\n", lvl_0_pa, content);
-    
-/*
-    uint64_t src, dst = 0x00041000000;
-    uint64_t num_words = 512;
-    // Inline assembly to copy the 4KB page
-    asm volatile (
-        // Extract physical base address from VTTBR_EL2
-        "mrs %0, VTTBR_EL2\n\t"          // Move VTTBR_EL2 to src
-        "lsr %0, %0, #8\n\t"             // Logical shift right by 8 bits
-        "and %0, %0, #0xfffffffff\n\t"   // Mask the lower 36 bits
-        "lsl %0, %0, #8\n\t"             // Logical shift left by 8 bits
-        
-        // Setup loop variables
-        "mov x1, %1\n\t"                 // Move dst to x1
-        "mov x2, %2\n\t"                 // Move num_words to x2
-        
-        "1:\n\t"
-        "ldr x4, [%0], #8\n\t"           // Load 8 bytes from source and increment source pointer
-        "str x4, [x1], #8\n\t"           // Store 8 bytes to destination and increment destination pointer
-        "subs x2, x2, #1\n\t"            // Decrement loop counter
-        "b.ne 1b\n\t"                    // If counter is not zero, branch to 1
-        
-        : "=&r"(src)                     // Output operand, src register (modified)
-        : "r"(dst), "r"(num_words)       // Input operands, dst and num_words
-        : "x0", "x1", "x2", "x4"         // Clobbered registers
-    );
-*/
-
+    printk("content of 0x%lx: 0x%lx\n", new_lvl_0_pa, content);
 
     return -HC_E_SUCCESS;
-    // return lvl_0_pa;
 }
