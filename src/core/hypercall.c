@@ -9,7 +9,6 @@
 #include <ipc.h>
 #include <changes2.h>
 #include <creates2.h>
-#include <null.h>
 
 long int hypercall(unsigned long id) {
     long int ret = -HC_E_INVAL_ID;
@@ -32,8 +31,8 @@ long int hypercall(unsigned long id) {
             ret = createS2();
             break;
         case HC_NULL:
-            WARNING("handle in HC_NULL");
-            ret = null();
+            // WARNING("handle in HC_NULL");
+            break;
         default:
             WARNING("Unknown hypercall id %d", id);
     }
